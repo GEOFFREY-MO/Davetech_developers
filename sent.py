@@ -7,15 +7,19 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+import logging
 
 # Download NLTK resources
 nltk.download('stopwords')
 nltk.download('wordnet')
 
+# Add logging configuration
+logging.basicConfig(level=logging.INFO)
+
 # Load the trained model
 @st.cache
 def load_model():
-    # Insert code to load your trained model
+    # Load your trained model here
     pass
 
 # Define text preprocessing function
@@ -50,6 +54,7 @@ def main():
 
         # Preprocess and predict sentiment
         X = preprocess_csv(uploaded_file)
+        logging.info("Preprocessed input data: %s", X)  # Log preprocessed input data
         prediction = model.predict(X)
         st.write(prediction)
 
@@ -58,6 +63,7 @@ def main():
     message = st.text_input("Enter your message:")
     if st.button("Predict"):
         cleaned_message = preprocess_text(message)
+        logging.info("Cleaned message: %s", cleaned_message)  # Log cleaned message
         prediction = model.predict([cleaned_message])
         st.write(prediction)
 
