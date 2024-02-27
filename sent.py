@@ -1,26 +1,19 @@
 import streamlit as st
 import pandas as pd
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
+import numpy as np
 import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-import logging
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.externals import joblib
+import os
+import threading
 
 # Download NLTK resources
 nltk.download('stopwords')
 nltk.download('wordnet')
-
-# Add logging configuration
-logging.basicConfig(level=logging.INFO)
-
-# Load the trained model
-@st.cache
-def load_model():
-    # Load your trained model here
-    pass
 
 # Define text preprocessing function
 def preprocess_text(text):
@@ -32,11 +25,23 @@ def preprocess_text(text):
     text = ' '.join(words)
     return text
 
-# Load the CSV file and preprocess the text
-def preprocess_csv(file):
-    df = pd.read_csv(file)
-    df['clean_tweets'] = df['tweets'].apply(preprocess_text)
-    return df['clean_tweets']
+# Load the trained model
+@st.cache
+def load_model():
+    model_path = "model.pkl"  # Path to your trained model
+    if os.path.exists(model_path):
+        return joblib.load(model_path)
+    else:
+        st.error("Model not found. Please train the model first.")
+
+# Background function for preprocessing data
+def preprocess_data(df):
+    if 'tweets' in df.columns:
+        df['clean_tweets'] = df['tweets'].apply(preprocess_text)
+        return df
+    else:
+        st.error("Invalid CSV file. 'tweets' column not found.")
+        return None
 
 # Main function for Streamlit app
 def main():
@@ -52,20 +57,20 @@ def main():
         st.write(df.head())
         st.write("CSV file uploaded successfully!")
 
-        # Preprocess and predict sentiment
-        X = preprocess_csv(uploaded_file)
-        logging.info("Preprocessed input data: %s", X)  # Log preprocessed input data
-        prediction = model.predict(X)
-        st.write(prediction)
+        # Start background thread for preprocessing data
+        thread = threading.Thread(target=preprocess_data, args=(df,))
+        thread.start()
 
     # Chat interface
     st.subheader("Chat Interface")
     message = st.text_input("Enter your message:")
     if st.button("Predict"):
-        cleaned_message = preprocess_text(message)
-        logging.info("Cleaned message: %s", cleaned_message)  # Log cleaned message
-        prediction = model.predict([cleaned_message])
-        st.write(prediction)
+        if not model:
+            st.error("Model not found. Please train the model first.")
+        else:
+            cleaned_message = preprocess_text(message)
+            prediction = model.predict([cleaned_message])
+            st.write(prediction)
 
 if __name__ == "__main__":
     main()
