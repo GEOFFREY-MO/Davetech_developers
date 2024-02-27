@@ -1,0 +1,45 @@
+import pandas as pd
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+import joblib
+
+# Download NLTK resources
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+# Load the dataset
+dataset = pd.read_csv('brookeside.csv')
+
+# Preprocess the text
+stop_words = set(stopwords.words('english'))
+lemmatizer = WordNetLemmatizer()
+
+def preprocess_text(text):
+    words = nltk.word_tokenize(text)
+    return " ".join([lemmatizer.lemmatize(word.lower()) for word in words if word.isalpha() and word.lower() not in stop_words])
+
+dataset['cleaned_tweets'] = dataset['tweets'].apply(preprocess_text)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(dataset['cleaned_tweets'], dataset['Sentiment'], test_size=0.2, random_state=42)
+
+# Vectorize the text data
+vectorizer = TfidfVectorizer(max_features=5000)
+X_train_vectorized = vectorizer.fit_transform(X_train)
+X_test_vectorized = vectorizer.transform(X_test)
+
+# Train a logistic regression model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train_vectorized, y_train)
+
+# Evaluate the model
+accuracy = model.score(X_test_vectorized, y_test)
+print("Accuracy:", accuracy)
+
+# Save the trained model
+joblib.dump(model, 'sentiment_analysis_model.pkl')
+print("Model saved as 'sentiment_analysis_model.pkl'")
