@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.externals import joblib
 import logging
+import joblib
 
 # Download NLTK resources
 nltk.download('stopwords')
