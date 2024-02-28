@@ -1,6 +1,5 @@
 # Import necessary libraries
 import pandas as pd
-import matplotlib.pyplot as plt
 import streamlit as st
 import re
 import nltk
@@ -10,6 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import joblib
 
 # Download NLTK resources
 nltk.download('stopwords')
@@ -47,9 +47,15 @@ def train_model(dataset):
     naive_bayes = MultinomialNB()
     naive_bayes.fit(X_train, y_train)
 
-    return naive_bayes, X_test, y_test
+    return naive_bayes, tfidf_vectorizer
 
-model, X_test, y_test = train_model(dataset)
+# Check if the model exists, if not, train it
+model_path = "sentiment_model.pkl"
+if not os.path.exists(model_path):
+    model, tfidf_vectorizer = train_model(dataset)
+    joblib.dump((model, tfidf_vectorizer), model_path)
+else:
+    model, tfidf_vectorizer = joblib.load(model_path)
 
 # Streamlit app
 def main():
