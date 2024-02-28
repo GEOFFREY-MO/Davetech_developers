@@ -1,0 +1,76 @@
+import pandas as pd
+import re
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load dataset
+dataset = pd.read_csv('brookeside.csv')
+
+# Download necessary resources from NLTK
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+# Define a function for text preprocessing
+def preprocess_text(text):
+    # Remove non-alphabetic characters and convert to lowercase
+    text = re.sub('[^a-zA-Z]', ' ', text)
+    text = text.lower()
+    # Tokenize the text
+    words = text.split()
+    # Remove stopwords and perform lemmatization
+    lemmatizer = WordNetLemmatizer()
+    words = [lemmatizer.lemmatize(word) for word in words if word not in set(stopwords.words('english'))]
+    # Join the words back into a string
+    text = ' '.join(words)
+    return text
+
+# Preprocess the text data in the dataset
+dataset['clean_tweets'] = dataset['tweets'].apply(preprocess_text)
+
+# Initialize TF-IDF Vectorizer
+tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+
+# Fit and transform the cleaned text data
+X_tfidf = tfidf_vectorizer.fit_transform(dataset['clean_tweets'])
+
+# Split the dataset into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X_tfidf, dataset['Sentiment'], test_size=0.2, random_state=42)
+
+# Define the parameter grid for the grid search
+param_grid = {'alpha': [0.01, 0.1, 0.5, 1.0]}
+
+# Create the GridSearchCV object
+grid_search = GridSearchCV(MultinomialNB(), param_grid, cv=5, scoring='accuracy')
+
+# Perform hyperparameter tuning on the training set
+grid_search.fit(X_train, y_train)
+
+# Get the best parameters and the corresponding mean cross-validated score
+best_params = grid_search.best_params_
+best_score = grid_search.best_score_
+
+print("Best parameters:", best_params)
+print("Best mean cross-validated score:", best_score)
+
+# Train the classifier with the best parameters on the full training set
+best_nb_classifier = MultinomialNB(alpha=best_params['alpha'])
+best_nb_classifier.fit(X_train, y_train)
+
+# Predict the sentiment labels for the testing set
+y_pred = best_nb_classifier.predict(X_test)
+
+# Evaluate the performance of the classifier
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("\nClassification Report:")
+print(classification_rep)
+print("\nConfusion Matrix:")
+print(conf_matrix)
