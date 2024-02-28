@@ -4,7 +4,6 @@ import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from sklearn.externals import joblib
 import logging
 import joblib
 
