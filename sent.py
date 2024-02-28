@@ -40,7 +40,7 @@ def preprocess_csv(file):
 
 # Main function for Streamlit app
 def main():
-    st.title("Sentiment Analysis Web App")
+    st.title("Brookside Tweets analysis")
 
     # Load model
     model = load_model()
