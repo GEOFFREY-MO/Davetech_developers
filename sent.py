@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
 import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.externals import joblib
 import logging
 
 # Download NLTK resources
@@ -17,10 +15,10 @@ nltk.download('wordnet')
 logging.basicConfig(level=logging.INFO)
 
 # Load the trained model
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_model():
-    # Load your trained model here
-    pass
+    model = joblib.load("sentiment_model.pkl")
+    return model
 
 # Define text preprocessing function
 def preprocess_text(text):
@@ -40,7 +38,7 @@ def preprocess_csv(file):
 
 # Main function for Streamlit app
 def main():
-    st.title("Brookside Tweets analysis")
+    st.title("Brookside Tweets Analysis")
 
     # Load model
     model = load_model()
@@ -50,7 +48,7 @@ def main():
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.write(df.head())
-        st.write("CSV file uploaded successfully!")
+        st.success("CSV file uploaded successfully!")
 
         # Preprocess and predict sentiment
         X = preprocess_csv(uploaded_file)
