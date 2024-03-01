@@ -67,7 +67,7 @@ def predict_sentiment(user_input, model, tfidf_vectorizer):
 # Main function
 def main():
     # Load dataset
-    dataset = load_dataset('brookeside.csv')
+    dataset = load_dataset('finaldata_tweets.csv')
 
     # Preprocess the dataset
     dataset['clean_tweets'] = dataset['tweets'].apply(preprocess_text)
@@ -92,7 +92,7 @@ def main():
 
     # Home
     if option == 'Home':
-        st.title('Sentiment Analysis App')
+        st.title('Sentiment Analysis Dekut Coffee Tweets App')
 
     # Explore Data
     elif option == 'Explore Data':
