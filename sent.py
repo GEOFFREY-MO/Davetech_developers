@@ -27,13 +27,13 @@ def explore_data(dataset):
 # Function to visualize sentiment distribution
 def visualize_sentiment_distribution(dataset):
     sentiment_counts = dataset['Sentiment'].value_counts()
-    plt.figure(figsize=(8, 6))
-    sentiment_counts.plot(kind='bar', color=['green', 'red', 'blue'])
-    plt.title('Distribution of Sentiments')
-    plt.xlabel('Sentiment')
-    plt.ylabel('Count')
-    plt.xticks(rotation=0)
-    st.pyplot()
+    fig, ax = plt.subplots(figsize=(8, 6))
+    sentiment_counts.plot(kind='bar', color=['green', 'red', 'blue'], ax=ax)
+    ax.set_title('Distribution of Sentiments')
+    ax.set_xlabel('Sentiment')
+    ax.set_ylabel('Count')
+    ax.tick_params(axis='x', rotation=0)
+    st.pyplot(fig)
 
 # Function for data preprocessing
 def preprocess_text(text):
