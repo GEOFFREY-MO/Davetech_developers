@@ -1,3 +1,13 @@
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+import nltk
+import os
+
+# Set NLTK data path
+nltk.data.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'nltk_data')))
+
 # Import necessary libraries
 import pandas as pd
 import matplotlib.pyplot as plt
