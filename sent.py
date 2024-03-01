@@ -2,13 +2,8 @@ import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
-import nltk
-import os
+nltk.data.path.append('/path/to/nltk_data')  # Set NLTK data path
 
-# Set NLTK data path
-nltk.data.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'nltk_data')))
-
-# Import necessary libraries
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -55,23 +50,6 @@ def preprocess_text(text):
     text = ' '.join(words)
     return text
 
-# Function for feature extraction using TF-IDF
-def extract_features(X_train, X_test):
-    tfidf_vectorizer = TfidfVectorizer(max_features=5000)
-    X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
-    X_test_tfidf = tfidf_vectorizer.transform(X_test)
-    return X_train_tfidf, X_test_tfidf
-
-# Function for model training and evaluation
-def train_evaluate_model(X_train, X_test, y_train, y_test):
-    naive_bayes = MultinomialNB()
-    naive_bayes.fit(X_train, y_train)
-    y_pred = naive_bayes.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
-    confusion = confusion_matrix(y_test, y_pred)
-    return accuracy, report, confusion
-
 # Function for making predictions
 def predict_sentiment(user_input, model, tfidf_vectorizer):
     preprocessed_input = preprocess_text(user_input)
@@ -96,6 +74,10 @@ def main():
     X_train_tfidf, X_test_tfidf = extract_features(X_train, X_test)
     model = MultinomialNB()
     model.fit(X_train_tfidf, y_train)
+    
+    # Initialize TF-IDF vectorizer
+    tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+    tfidf_vectorizer.fit(labeled_tweets['clean_tweets'])
 
     # Sidebar options
     st.sidebar.title('Navigation')
