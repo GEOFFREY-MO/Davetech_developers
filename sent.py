@@ -60,9 +60,11 @@ def extract_features(X_train, X_test):
 # Function for making predictions
 def predict_sentiment(user_input, model, tfidf_vectorizer):
     preprocessed_input = preprocess_text(user_input)
+    # Transform the preprocessed input using the same TF-IDF vectorizer used during training
     vectorized_input = tfidf_vectorizer.transform([preprocessed_input])
     prediction = model.predict(vectorized_input)
     return prediction[0]
+
 
 # Main function
 def main():
