@@ -18,7 +18,8 @@ import re
 
 # Function to load dataset
 def load_dataset(file_path):
-    return pd.read_csv(file_path, encoding='utf-8')
+    return pd.read_csv(file_path, encoding='latin1')
+
 # Function for basic data exploration
 def explore_data(dataset):
     st.write("First 5 rows of the dataset:")
