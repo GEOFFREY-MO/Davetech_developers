@@ -50,6 +50,13 @@ def preprocess_text(text):
     text = ' '.join(words)
     return text
 
+# Function for feature extraction using TF-IDF
+def extract_features(X_train, X_test):
+    tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+    X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+    X_test_tfidf = tfidf_vectorizer.transform(X_test)
+    return X_train_tfidf, X_test_tfidf
+
 # Function for making predictions
 def predict_sentiment(user_input, model, tfidf_vectorizer):
     preprocessed_input = preprocess_text(user_input)
