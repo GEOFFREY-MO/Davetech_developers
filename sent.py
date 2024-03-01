@@ -74,9 +74,22 @@ def main():
     # Load dataset
     dataset = load_dataset('brookeside.csv')
 
+    # Preprocess the dataset
+    dataset['clean_tweets'] = dataset['tweets'].apply(preprocess_text)
+
+    # Separate labeled and unlabeled tweets
+    labeled_tweets = dataset[dataset['Sentiment'].notnull()]
+    unlabeled_tweets = dataset[dataset['Sentiment'].isnull()]
+
+    # Train the model on labeled tweets
+    X_train, X_test, y_train, y_test = train_test_split(labeled_tweets['clean_tweets'], labeled_tweets['Sentiment'], test_size=0.2, random_state=42)
+    X_train_tfidf, X_test_tfidf = extract_features(X_train, X_test)
+    model = MultinomialNB()
+    model.fit(X_train_tfidf, y_train)
+
     # Sidebar options
     st.sidebar.title('Navigation')
-    option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution'])
+    option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment'])
 
     # Home
     if option == 'Home':
@@ -97,8 +110,6 @@ def main():
         st.title('Predict Sentiment')
         user_input = st.text_input("Enter a tweet:", "")
         if st.button("Predict"):
-            model = MultinomialNB()  # You can replace this with your trained model
-            tfidf_vectorizer = TfidfVectorizer(max_features=5000)  # You can replace this with your vectorizer
             prediction = predict_sentiment(user_input, model, tfidf_vectorizer)
             st.write("Predicted Sentiment:", prediction)
 
