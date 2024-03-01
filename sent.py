@@ -2,7 +2,6 @@ import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
-nltk.data.path.append('/path/to/nltk_data')  # Set NLTK data path
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,11 +9,9 @@ import streamlit as st
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-import nltk
+import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import re
 
 # Function to load dataset
 def load_dataset(file_path):
@@ -42,7 +39,7 @@ def visualize_sentiment_distribution(dataset):
 
 # Function for data preprocessing
 def preprocess_text(text):
-    text = re.sub('[^a-zA-Z]', ' ', text)
+    text = re.sub('[^a-zA-Z]', ' ', str(text))  # Ensure text is converted to string
     text = text.lower()
     words = text.split()
     lemmatizer = WordNetLemmatizer()
@@ -64,7 +61,6 @@ def predict_sentiment(user_input, model, tfidf_vectorizer):
     vectorized_input = tfidf_vectorizer.transform([preprocessed_input])
     prediction = model.predict(vectorized_input)
     return prediction[0]
-
 
 # Main function
 def main():
