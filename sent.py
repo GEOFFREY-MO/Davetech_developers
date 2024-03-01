@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import nltk
@@ -62,10 +62,11 @@ def train_evaluate_model(X_train, X_test, y_train, y_test):
     confusion = confusion_matrix(y_test, y_pred)
     return accuracy, report, confusion
 
-# Function for sentiment prediction
-def predict_sentiment(text, model, tfidf_vectorizer):
-    text_tfidf = tfidf_vectorizer.transform([text])
-    prediction = model.predict(text_tfidf)
+# Function for making predictions
+def predict_sentiment(user_input, model, tfidf_vectorizer):
+    preprocessed_input = preprocess_text(user_input)
+    vectorized_input = tfidf_vectorizer.transform([preprocessed_input])
+    prediction = model.predict(vectorized_input)
     return prediction[0]
 
 # Main function
@@ -75,7 +76,7 @@ def main():
 
     # Sidebar options
     st.sidebar.title('Navigation')
-    option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Sentiment Analysis'])
+    option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution'])
 
     # Home
     if option == 'Home':
@@ -91,31 +92,15 @@ def main():
         st.title('Visualize Sentiment Distribution')
         visualize_sentiment_distribution(dataset)
 
-    # Sentiment Analysis
-    elif option == 'Sentiment Analysis':
-        st.title('Sentiment Analysis')
-        st.write('Enter a tweet to analyze:')
-        user_input = st.text_area('')
-
-        if st.button('Analyze'):
-            # Load model and vectorizer
-            X = dataset['tweets']
-            y = dataset['Sentiment']
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            X_train_tfidf, X_test_tfidf = extract_features(X_train, X_test)
-            model = MultinomialNB()
-            model.fit(X_train_tfidf, y_train)
-
-            # Predict sentiment
+    # Prediction
+    elif option == 'Predict Sentiment':
+        st.title('Predict Sentiment')
+        user_input = st.text_input("Enter a tweet:", "")
+        if st.button("Predict"):
+            model = MultinomialNB()  # You can replace this with your trained model
+            tfidf_vectorizer = TfidfVectorizer(max_features=5000)  # You can replace this with your vectorizer
             prediction = predict_sentiment(user_input, model, tfidf_vectorizer)
-
-            # Display prediction
-            if prediction == 0:
-                st.write('Neutral')
-            elif prediction == 1:
-                st.write('Negative')
-            elif prediction == 2:
-                st.write('Positive')
+            st.write("Predicted Sentiment:", prediction)
 
 if __name__ == "__main__":
     main()
