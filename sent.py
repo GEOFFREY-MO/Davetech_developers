@@ -18,7 +18,7 @@ import re
 
 # Function to load dataset
 def load_dataset(file_path):
-    return pd.read_csv(file_path, encoding='latin1')
+    return pd.read_csv(file_path)
 
 # Function for basic data exploration
 def explore_data(dataset):
@@ -66,52 +66,51 @@ def predict_sentiment(user_input, model, tfidf_vectorizer):
 
 # Main function
 def main():
-    st.title('Sentiment Analysis App')
+    # Load dataset
+    dataset = load_dataset('brookeside.csv')
 
-    # Allow users to upload a file
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
-    if uploaded_file is not None:
-        # Load dataset
-        dataset = pd.read_csv(uploaded_file)
+    # Preprocess the dataset
+    dataset['clean_tweets'] = dataset['tweets'].apply(preprocess_text)
 
-        # Preprocess the dataset
-        dataset['clean_tweets'] = dataset['tweets'].apply(preprocess_text)
+    # Separate labeled and unlabeled tweets
+    labeled_tweets = dataset[dataset['Sentiment'].notnull()]
+    unlabeled_tweets = dataset[dataset['Sentiment'].isnull()]
 
-        # Separate labeled and unlabeled tweets
-        labeled_tweets = dataset[dataset['Sentiment'].notnull()]
-        unlabeled_tweets = dataset[dataset['Sentiment'].isnull()]
+    # Train the model on labeled tweets
+    X_train, X_test, y_train, y_test = train_test_split(labeled_tweets['clean_tweets'], labeled_tweets['Sentiment'], test_size=0.2, random_state=42)
+    X_train_tfidf, X_test_tfidf = extract_features(X_train, X_test)
+    model = MultinomialNB()
+    model.fit(X_train_tfidf, y_train)
+    
+    # Initialize TF-IDF vectorizer
+    tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+    tfidf_vectorizer.fit(labeled_tweets['clean_tweets'])
 
-        # Train the model on labeled tweets
-        X_train, X_test, y_train, y_test = train_test_split(labeled_tweets['clean_tweets'], labeled_tweets['Sentiment'], test_size=0.2, random_state=42)
-        X_train_tfidf, X_test_tfidf = extract_features(X_train, X_test)
-        model = MultinomialNB()
-        model.fit(X_train_tfidf, y_train)
+    # Sidebar options
+    st.sidebar.title('Navigation')
+    option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment'])
 
-        # Initialize TF-IDF vectorizer
-        tfidf_vectorizer = TfidfVectorizer(max_features=5000)
-        tfidf_vectorizer.fit(labeled_tweets['clean_tweets'])
+    # Home
+    if option == 'Home':
+        st.title('Sentiment Analysis App')
 
-        # Sidebar options
-        st.sidebar.title('Navigation')
-        option = st.sidebar.selectbox('Go to', ['Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment'])
+    # Explore Data
+    elif option == 'Explore Data':
+        st.title('Explore Data')
+        explore_data(dataset)
 
-        # Explore Data
-        if option == 'Explore Data':
-            st.title('Explore Data')
-            explore_data(dataset)
+    # Visualize Sentiment Distribution
+    elif option == 'Visualize Sentiment Distribution':
+        st.title('Visualize Sentiment Distribution')
+        visualize_sentiment_distribution(dataset)
 
-        # Visualize Sentiment Distribution
-        elif option == 'Visualize Sentiment Distribution':
-            st.title('Visualize Sentiment Distribution')
-            visualize_sentiment_distribution(dataset)
-
-        # Prediction
-        elif option == 'Predict Sentiment':
-            st.title('Predict Sentiment')
-            user_input = st.text_input("Enter a tweet:", "")
-            if st.button("Predict"):
-                prediction = predict_sentiment(user_input, model, tfidf_vectorizer)
-                st.write("Predicted Sentiment:", prediction)
+    # Prediction
+    elif option == 'Predict Sentiment':
+        st.title('Predict Sentiment')
+        user_input = st.text_input("Enter a tweet:", "")
+        if st.button("Predict"):
+            prediction = predict_sentiment(user_input, model, tfidf_vectorizer)
+            st.write("Predicted Sentiment:", prediction)
 
 if __name__ == "__main__":
     main()
