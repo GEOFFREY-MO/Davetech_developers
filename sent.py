@@ -6,6 +6,12 @@ import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud
+import nltk
+
+# Pre-download NLTK data if not already downloaded
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 # Function to load dataset
 def load_dataset(file_path):
@@ -22,7 +28,7 @@ def explore_data(dataset):
 
 # Function to visualize sentiment distribution
 def visualize_sentiment_distribution(dataset):
-    sentiment_counts = dataset['Sentiment'].value_counts()
+    sentiment_counts = dataset['Predicted_Sentiment'].value_counts()
     fig, ax = plt.subplots(figsize=(8, 6))
     sentiment_counts.plot(kind='bar', color=['green', 'red', 'blue'], ax=ax)
     ax.set_title('Distribution of Sentiments')
@@ -48,7 +54,11 @@ def load_sentiment_pipeline():
 # Function for making predictions using the sentiment analysis pipeline
 def predict_sentiment(text, sentiment_pipeline):
     preprocessed_text = preprocess_text(text)
-    result = sentiment_pipeline(preprocessed_text)[0]
+    try:
+        result = sentiment_pipeline(preprocessed_text)[0]
+    except Exception as e:
+        st.error(f"Error in prediction: {e}")
+        return None
     
     label_map = {
         "LABEL_0": "Negative",
@@ -115,7 +125,8 @@ def main():
                 if st.button("Predict"):
                     try:
                         prediction = predict_sentiment(user_input, sentiment_pipeline)
-                        st.write("Predicted Sentiment:", prediction)
+                        if prediction:
+                            st.write("Predicted Sentiment:", prediction)
                     except Exception as e:  # Handle potential errors during prediction
                         st.error(f"An error occurred: {e}")
 
