@@ -118,7 +118,7 @@ def main():
             sentiment_pipeline = load_sentiment_pipeline()
 
             # Analyze the dataset
-            dataset = analyze_dataset(dataset, sentiment_pipeline, text_column)
+            dataset = analyze_dataset(dataset, sentiment_pipeline, 'clean_tweets')
 
             # Sidebar options
             st.sidebar.title('Navigation')
