@@ -5,4 +5,3 @@ scikit-learn
 nltk
 transformers
 torch
-pipeline
