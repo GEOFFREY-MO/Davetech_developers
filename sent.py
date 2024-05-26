@@ -74,8 +74,8 @@ def predict_sentiment(text, sentiment_pipeline, max_length=128):
     return sentiment
 
 # Function to analyze the entire dataset and add sentiment labels
-def analyze_dataset(dataset, sentiment_pipeline, max_length=128):
-    dataset['Predicted_Sentiment'] = dataset['clean_tweets'].apply(lambda x: predict_sentiment(x, sentiment_pipeline, max_length=max_length))
+def analyze_dataset(dataset, sentiment_pipeline, text_column, max_length=128):
+    dataset['Predicted_Sentiment'] = dataset[text_column].apply(lambda x: predict_sentiment(x, sentiment_pipeline, max_length=max_length))
     return dataset
 
 # Function to generate word cloud
@@ -102,20 +102,23 @@ def clean_raw_twitter_data(text):
 
 # Main function
 def main():
-    # Error handling for file upload (optional)
     try:
         uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
         if uploaded_file is not None:
             dataset = load_dataset(uploaded_file)
-
+            
+            # Let user select the text column
+            st.write("Select the column containing the tweet text:")
+            text_column = st.selectbox('Text Column', dataset.columns)
+            
             # Preprocess the dataset
-            dataset['clean_tweets'] = dataset['tweets'].apply(clean_raw_twitter_data)
+            dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
 
             # Load sentiment analysis pipeline
             sentiment_pipeline = load_sentiment_pipeline()
 
             # Analyze the dataset
-            dataset = analyze_dataset(dataset, sentiment_pipeline)
+            dataset = analyze_dataset(dataset, sentiment_pipeline, text_column)
 
             # Sidebar options
             st.sidebar.title('Navigation')
@@ -127,7 +130,7 @@ def main():
                 st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
                 if st.button("Clean Tweets"):
                     st.write("Cleaning raw tweets...")
-                    dataset['clean_tweets'] = dataset['tweets'].apply(clean_raw_twitter_data)
+                    dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
                     st.write("Raw tweets cleaned successfully!")
 
             # Explore Data
@@ -161,7 +164,7 @@ def main():
                 st.title('Filter Tweets')
                 sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
                 filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
-                st.write(filtered_tweets[['tweets', 'Predicted_Sentiment']])
+                st.write(filtered_tweets[[text_column, 'Predicted_Sentiment']])
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
