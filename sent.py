@@ -5,6 +5,7 @@ from transformers import pipeline
 import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from wordcloud import WordCloud
 
 # Function to load dataset
 def load_dataset(file_path):
@@ -45,9 +46,9 @@ def load_sentiment_pipeline():
     return pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 
 # Function for making predictions using the sentiment analysis pipeline
-def predict_sentiment(user_input, sentiment_pipeline):
-    preprocessed_input = preprocess_text(user_input)
-    result = sentiment_pipeline(preprocessed_input)[0]
+def predict_sentiment(text, sentiment_pipeline):
+    preprocessed_text = preprocess_text(text)
+    result = sentiment_pipeline(preprocessed_text)[0]
     
     label_map = {
         "LABEL_0": "Negative",
@@ -57,6 +58,20 @@ def predict_sentiment(user_input, sentiment_pipeline):
     
     sentiment = label_map[result['label']]
     return sentiment
+
+# Function to analyze the entire dataset and add sentiment labels
+def analyze_dataset(dataset, sentiment_pipeline):
+    dataset['Predicted_Sentiment'] = dataset['clean_tweets'].apply(lambda x: predict_sentiment(x, sentiment_pipeline))
+    return dataset
+
+# Function to generate word cloud
+def generate_word_cloud(dataset, sentiment):
+    words = ' '.join(dataset[dataset['Predicted_Sentiment'] == sentiment]['clean_tweets'])
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(words)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    st.pyplot(plt)
 
 # Main function
 def main():
@@ -72,9 +87,12 @@ def main():
             # Load sentiment analysis pipeline
             sentiment_pipeline = load_sentiment_pipeline()
 
+            # Analyze the dataset
+            dataset = analyze_dataset(dataset, sentiment_pipeline)
+
             # Sidebar options
             st.sidebar.title('Navigation')
-            option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment'])
+            option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
 
             # Home
             if option == 'Home':
@@ -100,6 +118,20 @@ def main():
                         st.write("Predicted Sentiment:", prediction)
                     except Exception as e:  # Handle potential errors during prediction
                         st.error(f"An error occurred: {e}")
+
+            # Word Cloud
+            elif option == 'Word Cloud':
+                st.title('Word Cloud')
+                sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
+                if st.button("Generate Word Cloud"):
+                    generate_word_cloud(dataset, sentiment_option)
+
+            # Filter Tweets
+            elif option == 'Filter Tweets':
+                st.title('Filter Tweets')
+                sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
+                filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
+                st.write(filtered_tweets[['tweets', 'Predicted_Sentiment']])
 
     except Exception as e:  # Handle errors during file upload or other parts
         st.error(f"An error occurred: {e}")
