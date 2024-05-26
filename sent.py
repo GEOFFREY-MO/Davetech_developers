@@ -51,6 +51,8 @@ def preprocess_text(text):
 def predict_sentiment(user_input, model, tokenizer):
   preprocessed_input = preprocess_text(user_input)
   inputs = tokenizer(preprocessed_input, return_tensors="pt", truncation=True, padding=True, max_length=512)
+  inputs = {key: val.to(device) for key, val in inputs.items()}  # Move inputs to the same device as model
+  model.eval()  # Ensure the model is in evaluation mode
   with torch.no_grad():
     outputs = model(**inputs)
   prediction = torch.argmax(outputs.logits, dim=1).item()
@@ -70,6 +72,10 @@ def main():
       # Load pre-trained RoBERTa model and tokenizer
       tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
       model = RobertaForSequenceClassification.from_pretrained('roberta-base', num_labels=3)
+
+      # Move model to the appropriate device
+      device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+      model.to(device)
 
       # Sidebar options
       st.sidebar.title('Navigation')
