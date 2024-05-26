@@ -7,8 +7,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+from transformers import RobertaTokenizer, RobertaForSequenceClassification
+import torch
 import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -47,19 +47,13 @@ def preprocess_text(text):
   text = ' '.join(words)
   return text
 
-# Function for feature extraction using TF-IDF
-def extract_features(X_train, X_test, tfidf_vectorizer):
-  # No need to recreate vectorizer here, use the passed one
-  X_train_tfidf = tfidf_vectorizer.transform(X_train)
-  X_test_tfidf = tfidf_vectorizer.transform(X_test)
-  return X_train_tfidf, X_test_tfidf
-
-# Function for making predictions
-def predict_sentiment(user_input, model, tfidf_vectorizer):
+# Function for making predictions using RoBERTa
+def predict_sentiment(user_input, model, tokenizer):
   preprocessed_input = preprocess_text(user_input)
-  # Transform the preprocessed input using the same TF-IDF vectorizer used during training
-  vectorized_input = tfidf_vectorizer.transform([preprocessed_input])
-  prediction = model.predict(vectorized_input)[0]
+  inputs = tokenizer(preprocessed_input, return_tensors="pt", truncation=True, padding=True, max_length=512)
+  with torch.no_grad():
+    outputs = model(**inputs)
+  prediction = torch.argmax(outputs.logits, dim=1).item()
   return prediction
 
 # Main function
@@ -73,22 +67,11 @@ def main():
       # Preprocess the dataset
       dataset['clean_tweets'] = dataset['tweets'].apply(preprocess_text)
 
-      # Separate labeled and unlabeled tweets
-      labeled_tweets = dataset[dataset['Sentiment'].notnull()]
-      unlabeled_tweets = dataset[dataset['Sentiment'].isnull()]
+      # Load pre-trained RoBERTa model and tokenizer
+      tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+      model = RobertaForSequenceClassification.from_pretrained('roberta-base', num_labels=3)
 
-      # Train the model on labeled tweets
-      X_train, X_test, y_train, y_test = train_test_split(labeled_tweets['clean_tweets'], labeled_tweets['Sentiment'], test_size=0.2, random_state=42)
-
-      # Initialize TF-IDF vectorizer (once for all operations)
-      tfidf_vectorizer = TfidfVectorizer(max_features=5000)
-      tfidf_vectorizer.fit(labeled_tweets['clean_tweets'])
-
-      X_train_tfidf, X_test_tfidf = extract_features(X_train, X_test, tfidf_vectorizer)
-      model = MultinomialNB()
-      model.fit(X_train_tfidf, y_train)
-
-            # Sidebar options
+      # Sidebar options
       st.sidebar.title('Navigation')
       option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment'])
 
@@ -112,7 +95,7 @@ def main():
         user_input = st.text_input("Enter a tweet:", "")
         if st.button("Predict"):
           try:
-            prediction = predict_sentiment(user_input, model, tfidf_vectorizer)
+            prediction = predict_sentiment(user_input, model, tokenizer)
             st.write("Predicted Sentiment:", prediction)
           except Exception as e:  # Handle potential errors during prediction
             st.error(f"An error occurred: {e}")
@@ -122,4 +105,3 @@ def main():
 
 if __name__ == "__main__":
   main()
-
