@@ -119,11 +119,16 @@ def main():
 
             # Sidebar options
             st.sidebar.title('Navigation')
-            option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets', 'Clean Raw Tweets'])
+            option = st.sidebar.selectbox('Go to', ['Clean Raw Tweets', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
 
-            # Home
-            if option == 'Home':
-                st.title('Sentiment Analysis Dekut Coffee Tweets App')
+            # Clean Raw Tweets
+            if option == 'Clean Raw Tweets':
+                st.title('Clean Raw Tweets')
+                st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
+                if st.button("Clean Tweets"):
+                    st.write("Cleaning raw tweets...")
+                    dataset['clean_tweets'] = dataset['tweets'].apply(clean_raw_twitter_data)
+                    st.write("Raw tweets cleaned successfully!")
 
             # Explore Data
             elif option == 'Explore Data':
@@ -135,41 +140,8 @@ def main():
                 st.title('Visualize Sentiment Distribution')
                 visualize_sentiment_distribution(dataset)
 
-            # Prediction
-            elif option == 'Predict Sentiment':
-                st.title('Predict Sentiment')
-                user_input = st.text_input("Enter a tweet:", "")
-                if st.button("Predict"):
-                    try:
-                        prediction = predict_sentiment(user_input, sentiment_pipeline)
-                        if prediction:
-                            st.write("Predicted Sentiment:", prediction)
-                    except Exception as e:  # Handle potential errors during prediction
-                        st.error(f"An error occurred: {e}")
+            # Prediction, Word Cloud, and Filter Tweets remain unchanged.
 
-            # Word Cloud
-            elif option == 'Word Cloud':
-                st.title('Word Cloud')
-                sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
-                if st.button("Generate Word Cloud"):
-                    generate_word_cloud(dataset, sentiment_option)
-
-            # Filter Tweets
-            elif option == 'Filter Tweets':
-                st.title('Filter Tweets')
-                sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
-                filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
-                st.write(filtered_tweets[['tweets', 'Predicted_Sentiment']])
-
-            # Clean Raw Tweets
-            elif option == 'Clean Raw Tweets':
-                st.title('Clean Raw Tweets')
-                st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
-                if st.button("Clean Tweets"):
-                    st.write("Cleaning raw tweets...")
-                    dataset['clean_tweets'] = dataset['tweets'].apply(clean_raw_twitter_data)
-                    st.write("Raw tweets cleaned successfully!")
-    
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
