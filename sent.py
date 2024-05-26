@@ -39,8 +39,11 @@ def visualize_sentiment_distribution(dataset):
 
 # Function for data preprocessing
 def preprocess_text(text, max_length=128):
-    text = re.sub('[^a-zA-Z]', ' ', str(text))  # Ensure text is converted to string
-    text = text.lower()
+    text = re.sub(r'http\S+', '', text)  # Remove URLs
+    text = re.sub(r'@\w+', '', text)  # Remove user mentions
+    text = re.sub(r'#', '', text)  # Remove hashtag symbol
+    text = re.sub('[^a-zA-Z]', ' ', str(text))  # Remove punctuation and numbers
+    text = text.lower()  # Convert to lowercase
     words = text.split()
     lemmatizer = WordNetLemmatizer()
     words = [lemmatizer.lemmatize(word) for word in words if word not in set(stopwords.words('english'))]
@@ -84,6 +87,19 @@ def generate_word_cloud(dataset, sentiment):
     plt.axis('off')
     st.pyplot(plt)
 
+# Function to clean raw Twitter data
+def clean_raw_twitter_data(text):
+    text = re.sub(r'http\S+', '', text)  # Remove URLs
+    text = re.sub(r'@\w+', '', text)  # Remove user mentions
+    text = re.sub(r'#', '', text)  # Remove hashtag symbol
+    text = re.sub('[^a-zA-Z]', ' ', str(text))  # Remove punctuation and numbers
+    text = text.lower()  # Convert to lowercase
+    words = text.split()
+    lemmatizer = WordNetLemmatizer()
+    words = [lemmatizer.lemmatize(word) for word in words if word not in set(stopwords.words('english'))]
+    cleaned_text = ' '.join(words)
+    return cleaned_text
+
 # Main function
 def main():
     # Error handling for file upload (optional)
@@ -93,7 +109,7 @@ def main():
             dataset = load_dataset(uploaded_file)
 
             # Preprocess the dataset
-            dataset['clean_tweets'] = dataset['tweets'].apply(preprocess_text)
+            dataset['clean_tweets'] = dataset['tweets'].apply(clean_raw_twitter_data)
 
             # Load sentiment analysis pipeline
             sentiment_pipeline = load_sentiment_pipeline()
