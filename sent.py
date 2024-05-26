@@ -140,10 +140,31 @@ def main():
                 st.title('Visualize Sentiment Distribution')
                 visualize_sentiment_distribution(dataset)
 
-            # Prediction, Word Cloud, and Filter Tweets remain unchanged.
+            # Predict Sentiment
+            elif option == 'Predict Sentiment':
+                st.title('Predict Sentiment')
+                user_input = st.text_input("Enter a tweet:", "")
+                if st.button("Predict"):
+                    prediction = predict_sentiment(user_input, sentiment_pipeline)
+                    if prediction:
+                        st.write("Predicted Sentiment:", prediction)
+
+            # Generate Word Cloud
+            elif option == 'Word Cloud':
+                st.title('Word Cloud')
+                sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
+                if st.button("Generate Word Cloud"):
+                    generate_word_cloud(dataset, sentiment_option)
+
+            # Filter Tweets
+            elif option == 'Filter Tweets':
+                st.title('Filter Tweets')
+                sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
+                filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
+                st.write(filtered_tweets[['tweets', 'Predicted_Sentiment']])
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    main()
+    main
