@@ -38,14 +38,14 @@ def visualize_sentiment_distribution(dataset):
     st.pyplot(fig)
 
 # Function for data preprocessing
-def preprocess_text(text):
+def preprocess_text(text, max_length=128):
     text = re.sub('[^a-zA-Z]', ' ', str(text))  # Ensure text is converted to string
     text = text.lower()
     words = text.split()
     lemmatizer = WordNetLemmatizer()
     words = [lemmatizer.lemmatize(word) for word in words if word not in set(stopwords.words('english'))]
     text = ' '.join(words)
-    return text
+    return ' '.join(text.split()[:max_length])  # Truncate text to max_length words
 
 # Function to load sentiment analysis pipeline
 @st.cache(allow_output_mutation=True)
@@ -53,8 +53,8 @@ def load_sentiment_pipeline():
     return pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 
 # Function for making predictions using the sentiment analysis pipeline
-def predict_sentiment(text, sentiment_pipeline):
-    preprocessed_text = preprocess_text(text)
+def predict_sentiment(text, sentiment_pipeline, max_length=128):
+    preprocessed_text = preprocess_text(text, max_length=max_length)
     try:
         result = sentiment_pipeline(preprocessed_text)[0]
     except Exception as e:
@@ -67,12 +67,12 @@ def predict_sentiment(text, sentiment_pipeline):
         "LABEL_2": "Positive"
     }
     
-    sentiment = label_map[result['label']]
+    sentiment = label_map.get(result['label'], "Unknown")
     return sentiment
 
 # Function to analyze the entire dataset and add sentiment labels
-def analyze_dataset(dataset, sentiment_pipeline):
-    dataset['Predicted_Sentiment'] = dataset['clean_tweets'].apply(lambda x: predict_sentiment(x, sentiment_pipeline))
+def analyze_dataset(dataset, sentiment_pipeline, max_length=128):
+    dataset['Predicted_Sentiment'] = dataset['clean_tweets'].apply(lambda x: predict_sentiment(x, sentiment_pipeline, max_length=max_length))
     return dataset
 
 # Function to generate word cloud
