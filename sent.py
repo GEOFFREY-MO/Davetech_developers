@@ -102,6 +102,7 @@ def clean_raw_twitter_data(text):
 
 # Main function
 def main():
+    # Error handling for file upload (optional)
     try:
         uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
         if uploaded_file is not None:
@@ -120,19 +121,32 @@ def main():
             st.sidebar.title('Navigation')
             option = st.sidebar.selectbox('Go to', ['Home', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets', 'Clean Raw Tweets'])
 
-            # Home, Explore Data, Visualize Sentiment Distribution, Predict Sentiment, Word Cloud, Filter Tweets options remain unchanged.
+            # Home
+            if option == 'Home':
+                st.title('Sentiment Analysis Dekut Coffee Tweets App')
 
-            # Clean Raw Tweets
-            elif option == 'Clean Raw Tweets':
-                st.title('Clean Raw Tweets')
-                st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
-                if st.button("Clean Tweets"):
-                    st.write("Cleaning raw tweets...")
-                    dataset['clean_tweets'] = dataset['tweets'].apply(clean_raw_twitter_data)
-                    st.write("Raw tweets cleaned successfully!")
-    
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+            # Explore Data
+            elif option == 'Explore Data':
+                st.title('Explore Data')
+                explore_data(dataset)
+
+            # Visualize Sentiment Distribution
+            elif option == 'Visualize Sentiment Distribution':
+                st.title('Visualize Sentiment Distribution')
+                visualize_sentiment_distribution(dataset)
+
+            # Prediction
+            elif option == 'Predict Sentiment':
+                st.title('Predict Sentiment')
+                user_input = st.text_input("Enter a tweet:", "")
+                if st.button("Predict"):
+                    try:
+                        prediction = predict_sentiment(user_input, sentiment_pipeline)
+                        if prediction:
+                            st.write("Predicted Sentiment:", prediction)
+                    except Exception as e:  # Handle potential errors during prediction
+                        st.error(f"An error occurred: {e}")
+
             # Word Cloud
             elif option == 'Word Cloud':
                 st.title('Word Cloud')
@@ -147,7 +161,16 @@ def main():
                 filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
                 st.write(filtered_tweets[['tweets', 'Predicted_Sentiment']])
 
-    except Exception as e:  # Handle errors during file upload or other parts
+            # Clean Raw Tweets
+            elif option == 'Clean Raw Tweets':
+                st.title('Clean Raw Tweets')
+                st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
+                if st.button("Clean Tweets"):
+                    st.write("Cleaning raw tweets...")
+                    dataset['clean_tweets'] = dataset['tweets'].apply(clean_raw_twitter_data)
+                    st.write("Raw tweets cleaned successfully!")
+    
+    except Exception as e:
         st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
