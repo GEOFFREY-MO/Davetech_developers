@@ -8,10 +8,10 @@ from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud
 import nltk
 
-# Pre-download NLTK data if not already downloaded
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
+# Ensure NLTK data is downloaded outside of Streamlit execution
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
+nltk.download('wordnet', quiet=True)
 
 # Function to load dataset
 def load_dataset(file_path):
@@ -48,6 +48,7 @@ def preprocess_text(text):
     return text
 
 # Function to load sentiment analysis pipeline
+@st.cache(allow_output_mutation=True)
 def load_sentiment_pipeline():
     return pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 
