@@ -5,3 +5,4 @@ scikit-learn
 nltk
 transformers
 torch
+wordcloud
