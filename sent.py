@@ -48,7 +48,15 @@ def load_sentiment_pipeline():
 def predict_sentiment(user_input, sentiment_pipeline):
     preprocessed_input = preprocess_text(user_input)
     result = sentiment_pipeline(preprocessed_input)[0]
-    return result['label']
+    
+    label_map = {
+        "LABEL_0": "Negative",
+        "LABEL_1": "Neutral",
+        "LABEL_2": "Positive"
+    }
+    
+    sentiment = label_map[result['label']]
+    return sentiment
 
 # Main function
 def main():
