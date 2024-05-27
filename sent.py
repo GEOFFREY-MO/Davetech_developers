@@ -103,7 +103,7 @@ def clean_raw_twitter_data(text):
 # Main function
 def main():
     st.sidebar.title('Navigation')
-    option = st.sidebar.selectbox('Go to', ['Home', 'Upload Dataset', 'Clean Raw Tweets', 'Analyze Sentiment', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
+    option = st.sidebar.selectbox('Go to', ['Home', 'Upload Dataset', 'How to Use', 'Clean Raw Tweets', 'Analyze Sentiment', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
 
     if option == 'Home':
         st.title('Sentiment Analysis Dekut Coffee Tweets App')
@@ -116,6 +116,55 @@ def main():
             dataset = load_dataset(uploaded_file)
             st.session_state['dataset'] = dataset
             st.session_state['text_column'] = st.selectbox('Select the column containing the tweet text:', dataset.columns)
+
+    elif option == 'How to Use':
+        st.title('How to Use')
+        st.write("""
+        ### Step-by-Step User Guide
+        
+        **Step 1: Home**
+        - When you first open the app, you will land on the **Home** page.
+        - This page provides a welcome message and a brief introduction to the app.
+        
+        **Step 2: Upload Dataset**
+        - Navigate to the **Upload Dataset** tab using the sidebar.
+        - Click on the "Browse files" button to upload your CSV file containing the tweet data.
+        - After uploading, you will be prompted to select the column that contains the tweet text. Choose the appropriate column from the dropdown menu.
+        
+        **Step 3: Clean Raw Tweets**
+        - Once the dataset is uploaded and the text column is selected, go to the **Clean Raw Tweets** tab.
+        - Click the "Clean Tweets" button. This will clean the raw tweets in the selected column and create a new column `clean_tweets` in the dataset.
+        
+        **Step 4: Analyze Sentiment**
+        - Navigate to the **Analyze Sentiment** tab.
+        - Click the "Analyze Sentiment" button. This will run sentiment analysis on the cleaned tweets and add a new column `Predicted_Sentiment` to the dataset.
+        
+        **Step 5: Explore Data**
+        - Go to the **Explore Data** tab.
+        - This section allows you to view the first and last five rows of the dataset, as well as basic statistics.
+        
+        **Step 6: Visualize Sentiment Distribution**
+        - Navigate to the **Visualize Sentiment Distribution** tab.
+        - This section provides a bar chart showing the distribution of sentiments (Positive, Neutral, Negative) in your dataset.
+        
+        **Step 7: Predict Sentiment**
+        - Go to the **Predict Sentiment** tab.
+        - Enter a tweet in the text input box and click "Predict" to see the predicted sentiment for that tweet.
+        
+        **Step 8: Generate Word Cloud**
+        - Navigate to the **Word Cloud** tab.
+        - Select the sentiment (Positive, Neutral, Negative) for which you want to generate a word cloud.
+        - Click the "Generate Word Cloud" button to visualize the most common words for the selected sentiment.
+        
+        **Step 9: Filter Tweets**
+        - Go to the **Filter Tweets** tab.
+        - Select the sentiment (Positive, Neutral, Negative) to filter the tweets.
+        - The filtered tweets will be displayed, showing only the tweets that match the selected sentiment.
+        
+        ### Notes
+        - **Session State**: The app uses session state to track the progress of cleaning and sentiment analysis. Ensure you follow the steps in the given order to avoid any errors.
+        - **Error Handling**: If you encounter any errors, such as missing columns or issues during prediction, appropriate error messages will be displayed.
+        """)
 
     if 'dataset' in st.session_state and 'text_column' in st.session_state:
         dataset = st.session_state['dataset']
@@ -138,42 +187,39 @@ def main():
                     sentiment_pipeline = load_sentiment_pipeline()
                     dataset = analyze_dataset(dataset, sentiment_pipeline, 'clean_tweets')
                     st.session_state['analyzed'] = True
-                    st.write("Sentiment analysis completed successfully!")
+                    st.write("Sentiment analysis completed!")
 
             if 'analyzed' in st.session_state and st.session_state['analyzed']:
                 if option == 'Explore Data':
                     st.title('Explore Data')
                     explore_data(dataset)
 
-                elif option == 'Visualize Sentiment Distribution':
+                if option == 'Visualize Sentiment Distribution':
                     st.title('Visualize Sentiment Distribution')
                     visualize_sentiment_distribution(dataset)
 
-                elif option == 'Predict Sentiment':
+                if option == 'Predict Sentiment':
                     st.title('Predict Sentiment')
                     user_input = st.text_input("Enter a tweet:", "")
                     if st.button("Predict"):
-                        prediction = predict_sentiment(user_input, load_sentiment_pipeline())
+                        sentiment_pipeline = load_sentiment_pipeline()
+                        prediction = predict_sentiment(user_input, sentiment_pipeline)
                         if prediction:
                             st.write("Predicted Sentiment:", prediction)
 
-                elif option == 'Word Cloud':
+                if option == 'Word Cloud':
                     st.title('Word Cloud')
                     sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
                     if st.button("Generate Word Cloud"):
                         generate_word_cloud(dataset, sentiment_option)
 
-                elif option == 'Filter Tweets':
+                if option == 'Filter Tweets':
                     st.title('Filter Tweets')
                     sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
                     filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
                     st.write(filtered_tweets[[text_column, 'Predicted_Sentiment']])
-        else:
-            if option != 'Home' and option != 'Upload Dataset':
-                st.warning("Please clean the raw tweets before proceeding.")
     else:
-        if option != 'Home' and option != 'Upload Dataset':
-            st.warning("Please upload a dataset and select the text column to proceed.")
+        st.warning("Please upload a dataset and select the text column first.")
 
 if __name__ == "__main__":
     main()
