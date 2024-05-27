@@ -148,11 +148,12 @@ def main():
             if option == 'Analyze Sentiment':
                 st.title('Analyze Sentiment')
 if st.button("Analyze Sentiment"):
-st.write("Analyzing sentiment...")
-sentiment_pipeline = load_sentiment_pipeline()
-dataset = analyze_dataset(dataset, sentiment_pipeline, text_column)
-st.session_state['analyzed'] = True
-st.write("Sentiment analysis completed!")
+    
+    st.write("Analyzing sentiment...")
+    sentiment_pipeline = load_sentiment_pipeline()
+    dataset = analyze_dataset(dataset, sentiment_pipeline, text_column)
+    st.session_state['analyzed'] = True
+    st.write("Sentiment analysis completed!")
         if 'analyzed' in st.session_state and st.session_state['analyzed']:
             if option == 'Explore Data':
                 st.title('Explore Data')
