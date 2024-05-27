@@ -185,8 +185,10 @@ if st.button("Analyze Sentiment"):
             st.write(filtered_tweets[[text_column, 'Predicted_Sentiment']])
 
        if option == 'How to Use':
-            st.markdown("<h2 style='text-align: center; color: #0052cc;'><i class='fas fa-info-circle'></i> How to Use</h2>", unsafe_allow_html=True)
-            st.markdown("""
+           st.markdown("<h2 style='text-align: center; color: #0052cc;'><i class='fas fa-info-circle'></i> How to Use</h2>", unsafe_allow_html=True)
+           st.markdown("""
+           
+            
         ### Step-by-Step User Guide
         
         **Step 1: Home**
