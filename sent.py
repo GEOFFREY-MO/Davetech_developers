@@ -112,6 +112,14 @@ def main():
     elif option == 'How to Use':
         st.title('How to Use')
         st.write("This tab provides a step-by-step guide on how to use the app.")
+        st.write("Step 1: Upload Dataset")
+        st.write("Step 2: Clean Raw Tweets")
+        st.write("Step 3: Analyze Sentiment")
+        st.write("Step 4: Explore Data")
+        st.write("Step 5: Visualize Sentiment Distribution")
+        st.write("Step 6: Predict Sentiment")
+        st.write("Step 7: Generate Word Cloud")
+        st.write("Step 8: Filter Tweets")
 
     elif option == 'Upload Dataset':
         st.title('Upload Dataset')
@@ -127,7 +135,7 @@ def main():
         
         if option == 'Clean Raw Tweets':
             st.title('Clean Raw Tweets')
-            st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
+                        st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
             if st.button("Clean Tweets"):
                 st.write("Cleaning raw tweets...")
                 dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
@@ -178,3 +186,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
