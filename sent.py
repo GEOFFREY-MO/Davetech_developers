@@ -154,35 +154,35 @@ if st.button("Analyze Sentiment"):
     dataset = analyze_dataset(dataset, sentiment_pipeline, text_column)
     st.session_state['analyzed'] = True
     st.write("Sentiment analysis completed!")
-        if 'analyzed' in st.session_state and st.session_state['analyzed']:
-            if option == 'Explore Data':
-                st.title('Explore Data')
-                explore_data(dataset)
+    if 'analyzed' in st.session_state and st.session_state['analyzed']:
+        if option == 'Explore Data':
+            st.title('Explore Data')
+            explore_data(dataset)
 
-            if option == 'Visualize Sentiment Distribution':
-                st.title('Visualize Sentiment Distribution')
-                visualize_sentiment_distribution(dataset)
+        if option == 'Visualize Sentiment Distribution':
+            st.title('Visualize Sentiment Distribution')
+            visualize_sentiment_distribution(dataset)
 
-            if option == 'Predict Sentiment':
-                st.title('Predict Sentiment')
-                user_input = st.text_input("Enter a tweet:", "")
-                if st.button("Predict"):
-                    sentiment_pipeline = load_sentiment_pipeline()
-                    prediction = predict_sentiment(user_input, sentiment_pipeline)
-                    if prediction:
-                        st.write("Predicted Sentiment:", prediction)
+        if option == 'Predict Sentiment':
+            st.title('Predict Sentiment')
+            user_input = st.text_input("Enter a tweet:", "")
+            if st.button("Predict"):
+                sentiment_pipeline = load_sentiment_pipeline()
+                prediction = predict_sentiment(user_input, sentiment_pipeline)
+                if prediction:
+                    st.write("Predicted Sentiment:", prediction)
 
-            if option == 'Word Cloud':
-                st.title('Word Cloud')
-                sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
-                if st.button("Generate Word Cloud"):
-                    generate_word_cloud(dataset, sentiment_option)
+        if option == 'Word Cloud':
+            st.title('Word Cloud')
+            sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
+            if st.button("Generate Word Cloud"):
+                generate_word_cloud(dataset, sentiment_option)
 
-            if option == 'Filter Tweets':
-                st.title('Filter Tweets')
-                sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
-                filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
-                st.write(filtered_tweets[[text_column, 'Predicted_Sentiment']])
+        if option == 'Filter Tweets':
+            st.title('Filter Tweets')
+            sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
+            filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
+            st.write(filtered_tweets[[text_column, 'Predicted_Sentiment']])
 
 if option == 'How to Use':
     st.markdown("<h2 style='text-align: center; color: #0052cc;'><i class='fas fa-info-circle'></i> How to Use</h2>", unsafe_allow_html=True)
