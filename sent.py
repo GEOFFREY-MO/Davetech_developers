@@ -102,72 +102,63 @@ def clean_raw_twitter_data(text):
 
 # Main function
 def main():
-    try:
+    st.sidebar.title('Navigation')
+    option = st.sidebar.selectbox('Go to', ['Home', 'Upload Dataset', 'Clean Raw Tweets', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
+
+    if option == 'Home':
+        st.title('Sentiment Analysis Dekut Coffee Tweets App')
+        st.write("Welcome to the Sentiment Analysis App for Dekut Coffee Tweets. Please upload a dataset to get started.")
+
+    elif option == 'Upload Dataset':
+        st.title('Upload Dataset')
         uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
         if uploaded_file is not None:
             dataset = load_dataset(uploaded_file)
-            
-            # Let user select the text column
-            st.write("Select the column containing the tweet text:")
-            text_column = st.selectbox('Text Column', dataset.columns)
-            
-            # Preprocess the dataset
-            dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
+            st.session_state['dataset'] = dataset
+            st.session_state['text_column'] = st.selectbox('Select the column containing the tweet text:', dataset.columns)
 
-            # Load sentiment analysis pipeline
-            sentiment_pipeline = load_sentiment_pipeline()
+    if 'dataset' in st.session_state and 'text_column' in st.session_state:
+        dataset = st.session_state['dataset']
+        text_column = st.session_state['text_column']
+        
+        if option == 'Clean Raw Tweets':
+            st.title('Clean Raw Tweets')
+            st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
+            if st.button("Clean Tweets"):
+                st.write("Cleaning raw tweets...")
+                dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
+                st.write("Raw tweets cleaned successfully!✨✨")
 
-            # Analyze the dataset
-            dataset = analyze_dataset(dataset, sentiment_pipeline, 'clean_tweets')
+        elif option == 'Explore Data':
+            st.title('Explore Data')
+            explore_data(dataset)
 
-            # Sidebar options
-            st.sidebar.title('Navigation')
-            option = st.sidebar.selectbox('Go to', ['Clean Raw Tweets', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
+        elif option == 'Visualize Sentiment Distribution':
+            st.title('Visualize Sentiment Distribution')
+            visualize_sentiment_distribution(dataset)
 
-            # Clean Raw Tweets
-            if option == 'Clean Raw Tweets':
-                st.title('Clean Raw Tweets')
-                st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
-                if st.button("Clean Tweets"):
-                    st.write("Cleaning raw tweets...")
-                    dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
-                    st.write("Raw tweets cleaned successfully!")
+        elif option == 'Predict Sentiment':
+            st.title('Predict Sentiment')
+            user_input = st.text_input("Enter a tweet:", "")
+            if st.button("Predict"):
+                prediction = predict_sentiment(user_input, load_sentiment_pipeline())
+                if prediction:
+                    st.write("Predicted Sentiment:", prediction)
 
-            # Explore Data
-            elif option == 'Explore Data':
-                st.title('Explore Data')
-                explore_data(dataset)
+        elif option == 'Word Cloud':
+            st.title('Word Cloud')
+            sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
+            if st.button("Generate Word Cloud"):
+                generate_word_cloud(dataset, sentiment_option)
 
-            # Visualize Sentiment Distribution
-            elif option == 'Visualize Sentiment Distribution':
-                st.title('Visualize Sentiment Distribution')
-                visualize_sentiment_distribution(dataset)
-
-            # Predict Sentiment
-            elif option == 'Predict Sentiment':
-                st.title('Predict Sentiment')
-                user_input = st.text_input("Enter a tweet:", "")
-                if st.button("Predict"):
-                    prediction = predict_sentiment(user_input, sentiment_pipeline)
-                    if prediction:
-                        st.write("Predicted Sentiment:", prediction)
-
-            # Generate Word Cloud
-            elif option == 'Word Cloud':
-                st.title('Word Cloud')
-                sentiment_option = st.selectbox('Select Sentiment', ['Positive', 'Neutral', 'Negative'])
-                if st.button("Generate Word Cloud"):
-                    generate_word_cloud(dataset, sentiment_option)
-
-            # Filter Tweets
-            elif option == 'Filter Tweets':
-                st.title('Filter Tweets')
-                sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
-                filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
-                st.write(filtered_tweets[[text_column, 'Predicted_Sentiment']])
-
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+        elif option == 'Filter Tweets':
+            st.title('Filter Tweets')
+            sentiment_option = st.selectbox('Select Sentiment to Filter', ['Positive', 'Neutral', 'Negative'])
+            filtered_tweets = dataset[dataset['Predicted_Sentiment'] == sentiment_option]
+            st.write(filtered_tweets[[text_column, 'Predicted_Sentiment']])
+    else:
+        if option != 'Home' and option != 'Upload Dataset':
+            st.warning("Please upload a dataset and select the text column to proceed.")
 
 if __name__ == "__main__":
     main()
