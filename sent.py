@@ -232,5 +232,5 @@ if option == 'How to Use':
         - **Session State**: The app uses session state to track the progress of cleaning and sentiment analysis. Ensure you follow the steps in the given order to avoid any errors.
         - **Error Handling**: If you encounter any errors, such as missing columns or issues during prediction, appropriate error messages will be displayed.
         """, unsafe_allow_html=True)
-if name == "main":
-main()
+if __name__ == "__main__":
+    main()
