@@ -28,14 +28,17 @@ def explore_data(dataset):
 
 # Function to visualize sentiment distribution
 def visualize_sentiment_distribution(dataset):
-    sentiment_counts = dataset['Predicted_Sentiment'].value_counts()
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sentiment_counts.plot(kind='bar', color=['green', 'red', 'blue'], ax=ax)
-    ax.set_title('Distribution of Sentiments')
-    ax.set_xlabel('Sentiment')
-    ax.set_ylabel('Count')
-    ax.tick_params(axis='x', rotation=0)
-    st.pyplot(fig)
+    if 'Predicted_Sentiment' in dataset.columns:
+        sentiment_counts = dataset['Predicted_Sentiment'].value_counts()
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sentiment_counts.plot(kind='bar', color=['green', 'red', 'blue'], ax=ax)
+        ax.set_title('Distribution of Sentiments')
+        ax.set_xlabel('Sentiment')
+        ax.set_ylabel('Count')
+        ax.tick_params(axis='x', rotation=0)
+        st.pyplot(fig)
+    else:
+        st.error("Sentiment predictions have not been made yet. Please clean and analyze the dataset first.")
 
 # Function for data preprocessing
 def preprocess_text(text, max_length=128):
@@ -127,7 +130,7 @@ def main():
             if st.button("Clean Tweets"):
                 st.write("Cleaning raw tweets...")
                 dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
-                st.write("Raw tweets cleaned successfully!✨✨")
+                st.write("Raw tweets cleaned successfully!")
 
         elif option == 'Explore Data':
             st.title('Explore Data')
