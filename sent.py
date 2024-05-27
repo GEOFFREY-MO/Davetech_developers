@@ -105,7 +105,7 @@ def main():
     st.title('Sentiment Analysis Dekut Coffee Tweets App')
 
     # How to Use tab
-    st.markdown("<h2 style='text-align: center; color: #0052cc;'><i class='fas fa-info-circle'></i> How to Use</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #0052cc;'>How to Use</h2>", unsafe_allow_html=True)
     st.markdown("""
         ### Step-by-Step User Guide
         
@@ -116,7 +116,7 @@ def main():
         **Step 2: Upload Dataset**
         - Navigate to the **Upload Dataset** tab using the sidebar.
         - Click on the "Browse files" button to upload your CSV file containing the tweet data.
-        -After uploading, you will be prompted to select the column that contains the tweet text. Choose the appropriate column from the dropdown menu.
+        - After uploading, you will be prompted to select the column that contains the tweet text. Choose the appropriate column from the dropdown menu.
         
         **Step 3: Clean Raw Tweets**
         - Once the dataset is uploaded and the text column is selected, go to the **Clean Raw Tweets** tab.
@@ -152,25 +152,13 @@ def main():
         - **Session State**: The app uses session state to track the progress of cleaning and sentiment analysis. Ensure you follow the steps in the given order to avoid any errors.
         - **Error Handling**: If you encounter any errors, such as missing columns or issues during prediction, appropriate error messages will be displayed.
         """)
-
+        
     st.sidebar.title('Navigation')
-    options = {
-        "Home": "<i class='fas fa-home'></i> Home",
-        "Upload Dataset": "<i class='fas fa-file-upload'></i> Upload Dataset",
-        "Clean Raw Tweets": "<i class='fas fa-broom'></i> Clean Raw Tweets",
-        "Analyze Sentiment": "<i class='fas fa-chart-bar'></i> Analyze Sentiment",
-        "Explore Data": "<i class='fas fa-table'></i> Explore Data",
-        "Visualize Sentiment Distribution": "<i class='fas fa-chart-pie'></i> Visualize Sentiment Distribution",
-        "Predict Sentiment": "<i class='fas fa-bullseye'></i> Predict Sentiment",
-        "Word Cloud": "<i class='fas fa-cloud'></i> Word Cloud",
-        "Filter Tweets": "<i class='fas fa-filter'></i> Filter Tweets"
-    }
-    selected_option = st.sidebar.radio('Go to', list(options.values()), index=0)
-    option = list(options.keys())[list(options.values()).index(selected_option)]
+    option = st.sidebar.selectbox('Go to', ['Home', 'Upload Dataset', 'Clean Raw Tweets', 'Analyze Sentiment', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
 
     if option == 'Home':
         pass  # Home page content already displayed above
-
+    
     elif option == 'Upload Dataset':
         st.title('Upload Dataset')
         uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
@@ -182,7 +170,7 @@ def main():
     if 'dataset' in st.session_state and 'text_column' in st.session_state:
         dataset = st.session_state['dataset']
         text_column = st.session_state['text_column']
-
+        
         if option == 'Clean Raw Tweets':
             st.title('Clean Raw Tweets')
             st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
