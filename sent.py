@@ -135,7 +135,7 @@ def main():
         
         if option == 'Clean Raw Tweets':
             st.title('Clean Raw Tweets')
-                        st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
+            st.write("This function will clean the raw tweets and update the dataset with cleaned tweets.")
             if st.button("Clean Tweets"):
                 st.write("Cleaning raw tweets...")
                 dataset['clean_tweets'] = dataset[text_column].apply(clean_raw_twitter_data)
