@@ -102,24 +102,11 @@ def clean_raw_twitter_data(text):
 
 # Main function
 def main():
-    st.sidebar.title('Navigation')
-    option = st.sidebar.selectbox('Go to', ['Home', 'Upload Dataset', 'How to Use', 'Clean Raw Tweets', 'Analyze Sentiment', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
+    st.title('Sentiment Analysis Dekut Coffee Tweets App')
 
-    if option == 'Home':
-        st.title('Sentiment Analysis Dekut Coffee Tweets App')
-        st.write("Welcome to the Sentiment Analysis App for Dekut Coffee Tweets. Please upload a dataset to get started.")
-
-    elif option == 'Upload Dataset':
-        st.title('Upload Dataset')
-        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
-        if uploaded_file is not None:
-            dataset = load_dataset(uploaded_file)
-            st.session_state['dataset'] = dataset
-            st.session_state['text_column'] = st.selectbox('Select the column containing the tweet text:', dataset.columns)
-
-    elif option == 'How to Use':
-        st.title('How to Use')
-        st.write("""
+    # How to Use tab
+    st.markdown("<h2 style='text-align: center; color: #0052cc;'>How to Use</h2>", unsafe_allow_html=True)
+    st.markdown("""
         ### Step-by-Step User Guide
         
         **Step 1: Home**
@@ -165,6 +152,20 @@ def main():
         - **Session State**: The app uses session state to track the progress of cleaning and sentiment analysis. Ensure you follow the steps in the given order to avoid any errors.
         - **Error Handling**: If you encounter any errors, such as missing columns or issues during prediction, appropriate error messages will be displayed.
         """)
+        
+    st.sidebar.title('Navigation')
+    option = st.sidebar.selectbox('Go to', ['Home', 'Upload Dataset', 'Clean Raw Tweets', 'Analyze Sentiment', 'Explore Data', 'Visualize Sentiment Distribution', 'Predict Sentiment', 'Word Cloud', 'Filter Tweets'])
+
+    if option == 'Home':
+        pass  # Home page content already displayed above
+    
+    elif option == 'Upload Dataset':
+        st.title('Upload Dataset')
+        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+        if uploaded_file is not None:
+            dataset = load_dataset(uploaded_file)
+            st.session_state['dataset'] = dataset
+            st.session_state['text_column'] = st.selectbox('Select the column containing the tweet text:', dataset.columns)
 
     if 'dataset' in st.session_state and 'text_column' in st.session_state:
         dataset = st.session_state['dataset']
@@ -185,7 +186,7 @@ def main():
                 if st.button("Analyze Sentiment"):
                     st.write("Analyzing sentiment...")
                     sentiment_pipeline = load_sentiment_pipeline()
-                    dataset = analyze_dataset(dataset, sentiment_pipeline, 'clean_tweets')
+                    dataset = analyze_dataset(dataset, sentiment_pipeline, text_column)
                     st.session_state['analyzed'] = True
                     st.write("Sentiment analysis completed!")
 
