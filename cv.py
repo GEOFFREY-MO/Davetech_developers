@@ -1,5 +1,6 @@
 import streamlit as st
-import pandas as pd
+from pylatex import Document, Section, Subsection, Command, Package
+from pylatex.utils import NoEscape
 from datetime import date
 
 def main():
@@ -59,33 +60,53 @@ def main():
       generate_cv(name, email, phone, address, education, work_experience, skills)
 
 def generate_cv(name, email, phone, address, education, work_experience, skills):
-  st.header("Generated CV")
-  st.subheader("Personal Information")
-  st.write(f"**Name:** {name}")
-  st.write(f"**Email:** {email}")
-  st.write(f"**Phone:** {phone}")
-  st.write(f"**Address:** {address}")
+  doc = Document(documentclass='simplehipstercv', document_options='lighthipster')
+  doc.packages.append(Package('inputenc', options='utf8'))
+  doc.packages.append(Package('geometry', options='margin=1cm, a4paper'))
+  doc.packages.append(Package('raleway', options='default'))
 
-  st.subheader("Education")
-  for edu in education:
-      st.write(f"**School/University:** {edu['school']}")
-      st.write(f"**Degree:** {edu['degree']}")
-      st.write(f"**Field of Study:** {edu['field_of_study']}")
-      st.write(f"**Start Date:** {edu['start_date']}")
-      st.write(f"**End Date:** {edu['end_date']}")
-      st.write("---")
+  doc.preamble.append(Command('title', 'New Simple CV'))
+  doc.preamble.append(Command('author', 'LaTeX Ninja'))
+  doc.preamble.append(Command('date', 'July 2024'))
+  doc.append(NoEscape(r'\pagestyle{empty}'))
+  doc.append(NoEscape(r'\begin{document}'))
+  doc.append(NoEscape(r'\thispagestyle{empty}'))
 
-  st.subheader("Work Experience")
-  for exp in work_experience:
-      st.write(f"**Company:** {exp['company']}")
-      st.write(f"**Position:** {exp['position']}")
-      st.write(f"**Start Date:** {exp['start_date']}")
-      st.write(f"**End Date:** {exp['end_date']}")
-      st.write(f"**Description:** {exp['description']}")
-      st.write("---")
+  # Header
+  doc.append(NoEscape(r'\simpleheader{headercolour}{' + name.split()[0] + r'}{' + name.split()[1] + r'}{Position}{white}'))
 
-  st.subheader("Skills")
-  st.write(skills)
+  # Personal Information
+  with doc.create(Section('Personal Information', numbering=False)):
+      doc.append(f"**Name:** {name}\n")
+      doc.append(f"**Email:** {email}\n")
+      doc.append(f"**Phone:** {phone}\n")
+      doc.append(f"**Address:** {address}\n")
+
+  # Education
+  with doc.create(Section('Education', numbering=False)):
+      for edu in education:
+          with doc.create(Subsection(f"{edu['degree']} in {edu['field_of_study']}", numbering=False)):
+              doc.append(f"**School/University:** {edu['school']}\n")
+              doc.append(f"**Start Date:** {edu['start_date']}\n")
+              doc.append(f"**End Date:** {edu['end_date']}\n")
+
+  # Work Experience
+  with doc.create(Section('Work Experience', numbering=False)):
+      for exp in work_experience:
+          with doc.create(Subsection(f"{exp['position']} at {exp['company']}", numbering=False)):
+              doc.append(f"**Start Date:** {exp['start_date']}\n")
+              doc.append(f"**End Date:** {exp['end_date']}\n")
+              doc.append(f"**Description:** {exp['description']}\n")
+
+  # Skills
+  with doc.create(Section('Skills', numbering=False)):
+      doc.append(skills)
+
+  doc.append(NoEscape(r'\end{document}'))
+
+  # Save the LaTeX document
+  doc.generate_pdf('cv', clean_tex=False)
+  st.success("CV generated successfully! Check the file 'cv.pdf'.")
 
 if __name__ == "__main__":
   main()
