@@ -48,18 +48,18 @@ def main():
     st.subheader("Education")
     education = []
     for i in range(3):  # You can add more or make it dynamic
-        degree = st.text_input(f"Degree {i+1}")
-        field = st.text_input(f"Field of Study {i+1}")
-        institution = st.text_input(f"Institution {i+1}")
-        year = st.text_input(f"Year {i+1}")
+        degree = st.text_input(f"Degree {i+1}", key=f"degree_{i+1}")
+        field = st.text_input(f"Field of Study {i+1}", key=f"field_{i+1}")
+        institution = st.text_input(f"Institution {i+1}", key=f"institution_{i+1}")
+        year = st.text_input(f"Year {i+1}", key=f"year_{i+1}")
         education.append({"degree": degree, "field": field, "institution": institution, "year": year})
     
     st.subheader("Experience")
     experience = []
     for i in range(3):  # You can add more or make it dynamic
-        position = st.text_input(f"Position {i+1}")
-        company = st.text_input(f"Company {i+1}")
-        year = st.text_input(f"Year {i+1}")
+        position = st.text_input(f"Position {i+1}", key=f"position_{i+1}")
+        company = st.text_input(f"Company {i+1}", key=f"company_{i+1}")
+        year = st.text_input(f"Year {i+1}", key=f"exp_year_{i+1}")
         experience.append({"position": position, "company": company, "year": year})
     
     template_choice = st.selectbox("Select Template", list(TEMPLATES.keys()))
