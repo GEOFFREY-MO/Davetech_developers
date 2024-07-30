@@ -9,3 +9,5 @@ jinja2
 pylatex
 subprocess
 pdflatex
+pdfkit
+wkhtmltopdf
