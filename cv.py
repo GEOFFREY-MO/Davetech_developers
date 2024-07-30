@@ -1,6 +1,5 @@
 import streamlit as st
-from pylatex import Document, Section, Subsection, Command, Package
-from pylatex.utils import NoEscape
+import subprocess
 from datetime import date
 
 def main():
@@ -102,76 +101,90 @@ def main():
       generate_cv(name, email, phone, address, profile_pic, education, work_experience, projects, certifications, languages, skills)
 
 def generate_cv(name, email, phone, address, profile_pic, education, work_experience, projects, certifications, languages, skills):
-  doc = Document(documentclass='simplehipstercv', document_options='lighthipster')
-  doc.packages.append(Package('inputenc', options='utf8'))
-  doc.packages.append(Package('geometry', options='margin=1cm, a4paper'))
-  doc.packages.append(Package('raleway', options='default'))
+  latex_content = r"""
+  \documentclass[lighthipster]{simplehipstercv}
+  \usepackage[utf8]{inputenc}
+  \usepackage[default]{raleway}
+  \usepackage[margin=1cm, a4paper]{geometry}
+  \title{New Simple CV}
+  \author{LaTeX Ninja}
+  \date{July 2024}
+  \pagestyle{empty}
+  \begin{document}
+  \thispagestyle{empty}
+  \simpleheader{headercolour}{""" + name.split()[0] + r"""}{""" + name.split()[1] + r"""}{Position}{white}
+  \section*{Personal Information}
+  \begin{itemize}
+      \item \textbf{Name:} """ + name + r"""
+      \item \textbf{Email:} """ + email + r"""
+      \item \textbf{Phone:} """ + phone + r"""
+      \item \textbf{Address:} """ + address + r"""
+  \end{itemize}
+  \section*{Education}
+  """
+  for edu in education:
+      latex_content += r"""
+      \subsection*{""" + edu['degree'] + r""" in """ + edu['field_of_study'] + r"""}
+      \begin{itemize}
+          \item \textbf{School/University:} """ + edu['school'] + r"""
+          \item \textbf{Start Date:} """ + str(edu['start_date']) + r"""
+          \item \textbf{End Date:} """ + str(edu['end_date']) + r"""
+      \end{itemize}
+      """
 
-  doc.preamble.append(Command('title', 'New Simple CV'))
-  doc.preamble.append(Command('author', 'LaTeX Ninja'))
-  doc.preamble.append(Command('date', 'July 2024'))
-  doc.append(NoEscape(r'\pagestyle{empty}'))
-  doc.append(NoEscape(r'\begin{document}'))
-  doc.append(NoEscape(r'\thispagestyle{empty}'))
+  latex_content += r"""
+  \section*{Work Experience}
+  """
+  for exp in work_experience:
+      latex_content += r"""
+      \subsection*{""" + exp['position'] + r""" at """ + exp['company'] + r"""}
+      \begin{itemize}
+          \item \textbf{Start Date:} """ + str(exp['start_date']) + r"""
+          \item \textbf{End Date:} """ + str(exp['end_date']) + r"""
+          \item \textbf{Description:} """ + exp['description'] + r"""
+      \end{itemize}
+      """
 
-  # Header
-  doc.append(NoEscape(r'\simpleheader{headercolour}{' + name.split()[0] + r'}{' + name.split()[1] + r'}{Position}{white}'))
+  latex_content += r"""
+  \section*{Projects}
+  """
+  for proj in projects:
+      latex_content += r"""
+      \subsection*{""" + proj['name'] + r"""}
+      """ + proj['description'] + r"""
+      """
 
-  # Profile Picture
-  if profile_pic is not None:
-      with open("profile_pic.jpg", "wb") as f:
-          f.write(profile_pic.getbuffer())
-      doc.append(NoEscape(r'\begin{center}\includegraphics[width=0.2\textwidth]{profile_pic.jpg}\end{center}'))
+  latex_content += r"""
+  \section*{Certifications}
+  """
+  for cert in certifications:
+      latex_content += r"""
+      \subsection*{""" + cert['name'] + r"""}
+      \begin{itemize}
+          \item \textbf{Issuer:} """ + cert['issuer'] + r"""
+          \item \textbf{Date:} """ + str(cert['date']) + r"""
+      \end{itemize}
+      """
 
-  # Personal Information
-  with doc.create(Section('Personal Information', numbering=False)):
-      doc.append(f"**Name:** {name}\n")
-      doc.append(f"**Email:** {email}\n")
-      doc.append(f"**Phone:** {phone}\n")
-      doc.append(f"**Address:** {address}\n")
+  latex_content += r"""
+  \section*{Languages}
+  """
+  for lang in languages:
+      latex_content += r"""
+      \subsection*{""" + lang['language'] + r"""}
+      """ + lang['proficiency'] + r"""
+      """
 
-  # Education
-  with doc.create(Section('Education', numbering=False)):
-      for edu in education:
-          with doc.create(Subsection(f"{edu['degree']} in {edu['field_of_study']}", numbering=False)):
-              doc.append(f"**School/University:** {edu['school']}\n")
-              doc.append(f"**Start Date:** {edu['start_date']}\n")
-              doc.append(f"**End Date:** {edu['end_date']}\n")
+  latex_content += r"""
+  \section*{Skills}
+  """ + skills + r"""
+  \end{document}
+  """
 
-  # Work Experience
-  with doc.create(Section('Work Experience', numbering=False)):
-      for exp in work_experience:
-          with doc.create(Subsection(f"{exp['position']} at {exp['company']}", numbering=False)):
-              doc.append(f"**Start Date:** {exp['start_date']}\n")
-              doc.append(f"**End Date:** {exp['end_date']}\n")
-              doc.append(f"**Description:** {exp['description']}\n")
+  with open("cv.tex", "w") as f:
+      f.write(latex_content)
 
-  # Projects
-  with doc.create(Section('Projects', numbering=False)):
-      for proj in projects:
-          with doc.create(Subsection(proj['name'], numbering=False)):
-              doc.append(proj['description'])
-
-  # Certifications
-  with doc.create(Section('Certifications', numbering=False)):
-      for cert in certifications:
-          with doc.create(Subsection(cert['name'], numbering=False)):
-              doc.append(f"**Issuer:** {cert['issuer']}\n")
-              doc.append(f"**Date:** {cert['date']}\n")
-
-  # Languages
-  with doc.create(Section('Languages', numbering=False)):
-      for lang in languages:
-          doc.append(f"**{lang['language']}:** {lang['proficiency']}\n")
-
-  # Skills
-  with doc.create(Section('Skills', numbering=False)):
-      doc.append(skills)
-
-  doc.append(NoEscape(r'\end{document}'))
-
-  # Save the LaTeX document
-  doc.generate_pdf('cv', clean_tex=False)
+  subprocess.run(["pdflatex", "cv.tex"])
   st.success("CV generated successfully! Check the file 'cv.pdf'.")
 
 if __name__ == "__main__":
