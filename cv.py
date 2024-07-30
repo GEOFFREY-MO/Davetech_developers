@@ -1,34 +1,34 @@
 import streamlit as st
 from jinja2 import Template
 import subprocess
-import os
 
 # LaTeX Templates
 TEMPLATES = {
     "Template 1": r"""
     \documentclass{article}
+    \usepackage[utf8]{inputenc}
     \begin{document}
     \title{Curriculum Vitae}
-    \author{{{ name }}} 
+    \author{{{{ name }}}} 
     \date{\today}
     \maketitle
     \section*{Contact Information}
     \begin{tabular}{rl}
-    Email: & {{ email }} \\
-    Phone: & {{ phone }} \\
+    Email: & {{{{ email }}}} \\
+    Phone: & {{{{ phone }}}} \\
     \end{tabular}
     \section*{Education}
     {% for edu in education %}
-    \textbf{{ edu.degree }} in {{ edu.field }} \\
-    {{ edu.institution }}, {{ edu.year }} \\
+    \textbf{{{{ edu.degree }}}} in {{{{ edu.field }}}} \\
+    {{{{ edu.institution }}}}, {{{{ edu.year }}}} \\
     {% endfor %}
     \section*{Experience}
     {% for exp in experience %}
-    \textbf{{ exp.position }} \\
-    {{ exp.company }}, {{ exp.year }} \\
+    \textbf{{{{ exp.position }}}} \\
+    {{{{ exp.company }}}}, {{{{ exp.year }}}} \\
     {% endfor %}
     \end{document}
-    """,
+    """
     # Add more templates as needed
 }
 
@@ -36,7 +36,7 @@ def create_latex_file(template, context):
     latex_code = Template(template).render(context)
     with open("cv.tex", "w") as f:
         f.write(latex_code)
-    subprocess.run(["pdflatex", "cv.tex"], stdout=subprocess.PIPE)
+    subprocess.run(["pdflatex", "cv.tex"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 def main():
     st.title("CV Builder")
@@ -79,7 +79,7 @@ def main():
                 label="Download CV",
                 data=pdf_file,
                 file_name="cv.pdf",
-                mime="application/octet-stream",
+                mime="application/pdf",
             )
 
 if __name__ == "__main__":
