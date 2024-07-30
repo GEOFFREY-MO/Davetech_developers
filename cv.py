@@ -1,6 +1,7 @@
 import streamlit as st
-import subprocess
+import pdfkit
 from datetime import date
+import os
 
 def main():
     st.title("Comprehensive CV Builder")
@@ -101,91 +102,96 @@ def main():
         generate_cv(name, email, phone, address, profile_pic, education, work_experience, projects, certifications, languages, skills)
 
 def generate_cv(name, email, phone, address, profile_pic, education, work_experience, projects, certifications, languages, skills):
-    latex_content = r"""
-    \documentclass[lighthipster]{simplehipstercv}
-    \usepackage[utf8]{inputenc}
-    \usepackage[default]{raleway}
-    \usepackage[margin=1cm, a4paper]{geometry}
-    \title{New Simple CV}
-    \author{LaTeX Ninja}
-    \date{July 2024}
-    \pagestyle{empty}
-    \begin{document}
-    \thispagestyle{empty}
-    \simpleheader{headercolour}{""" + name.split()[0] + r"""}{""" + name.split()[1] + r"""}{Position}{white}
-    \section*{Personal Information}
-    \begin{itemize}
-        \item \textbf{Name:} """ + name + r"""
-        \item \textbf{Email:} """ + email + r"""
-        \item \textbf{Phone:} """ + phone + r"""
-        \item \textbf{Address:} """ + address + r"""
-    \end{itemize}
-    \section*{Education}
+    html_content = f"""
+    <html>
+    <head>
+    <style>
+        body {{ font-family: Arial, sans-serif; }}
+        .section-title {{ font-size: 24px; font-weight: bold; margin-top: 20px; }}
+        .subsection-title {{ font-size: 20px; font-weight: bold; margin-top: 10px; }}
+        .item {{ margin-top: 10px; }}
+        .item-title {{ font-weight: bold; }}
+        .item-details {{ margin-left: 20px; }}
+    </style>
+    </head>
+    <body>
+    <h1>{name}</h1>
+    <p><strong>Email:</strong> {email}</p>
+    <p><strong>Phone:</strong> {phone}</p>
+    <p><strong>Address:</strong> {address}</p>
     """
+
+    html_content += "<div class='section-title'>Education</div>"
     for edu in education:
-        latex_content += r"""
-        \subsection*{""" + edu['degree'] + r""" in """ + edu['field_of_study'] + r"""}
-        \begin{itemize}
-            \item \textbf{School/University:} """ + edu['school'] + r"""
-            \item \textbf{Start Date:} """ + str(edu['start_date']) + r"""
-            \item \textbf{End Date:} """ + str(edu['end_date']) + r"""
-        \end{itemize}
+        html_content += f"""
+        <div class='item'>
+            <div class='item-title'>{edu['degree']} in {edu['field_of_study']}</div>
+            <div class='item-details'>
+                <p><strong>School/University:</strong> {edu['school']}</p>
+                <p><strong>Start Date:</strong> {edu['start_date']}</p>
+                <p><strong>End Date:</strong> {edu['end_date']}</p>
+            </div>
+        </div>
         """
 
-    latex_content += r"""
-    \section*{Work Experience}
-    """
+    html_content += "<div class='section-title'>Work Experience</div>"
     for exp in work_experience:
-        latex_content += r"""
-        \subsection*{""" + exp['position'] + r""" at """ + exp['company'] + r"""}
-        \begin{itemize}
-            \item \textbf{Start Date:} """ + str(exp['start_date']) + r"""
-            \item \textbf{End Date:} """ + str(exp['end_date']) + r"""
-            \item \textbf{Description:} """ + exp['description'] + r"""
-        \end{itemize}
+        html_content += f"""
+        <div class='item'>
+            <div class='item-title'>{exp['position']} at {exp['company']}</div>
+            <div class='item-details'>
+                <p><strong>Start Date:</strong> {exp['start_date']}</p>
+                <p><strong>End Date:</strong> {exp['end_date']}</p>
+                <p><strong>Description:</strong> {exp['description']}</p>
+            </div>
+        </div>
         """
 
-    latex_content += r"""
-    \section*{Projects}
-    """
+    html_content += "<div class='section-title'>Projects</div>"
     for proj in projects:
-        latex_content += r"""
-        \subsection*{""" + proj['name'] + r"""}
-        """ + proj['description'] + r"""
+        html_content += f"""
+        <div class='item'>
+            <div class='item-title'>{proj['name']}</div>
+            <div class='item-details'>
+                {proj['description']}
+            </div>
+        </div>
         """
 
-    latex_content += r"""
-    \section*{Certifications}
-    """
+    html_content += "<div class='section-title'>Certifications</div>"
     for cert in certifications:
-        latex_content += r"""
-        \subsection*{""" + cert['name'] + r"""}
-        \begin{itemize}
-            \item \textbf{Issuer:} """ + cert['issuer'] + r"""
-            \item \textbf{Date:} """ + str(cert['date']) + r"""
-        \end{itemize}
+        html_content += f"""
+        <div class='item'>
+            <div class='item-title'>{cert['name']}</div>
+            <div class='item-details'>
+                <p><strong>Issuer:</strong> {cert['issuer']}</p>
+                <p><strong>Date:</strong> {cert['date']}</p>
+            </div>
+        </div>
         """
 
-    latex_content += r"""
-    \section*{Languages}
-    """
+    html_content += "<div class='section-title'>Languages</div>"
     for lang in languages:
-        latex_content += r"""
-        \subsection*{""" + lang['language'] + r"""}
-        """ + lang['proficiency'] + r"""
+        html_content += f"""
+        <div class='item'>
+            <div class='item-title'>{lang['language']} ({lang['proficiency']})</div>
+        </div>
         """
 
-    latex_content += r"""
-    \section*{Skills}
-    """ + skills + r"""
-    \end{document}
-    """
+    html_content += f"<div class='section-title'>Skills</div><div>{skills}</div>"
 
-    with open("cv.tex", "w") as f:
-        f.write(latex_content)
+    html_content += "</body></html>"
 
-    subprocess.run(["pdflatex", "cv.tex"])
-    st.success("CV generated successfully! Check the file 'cv.pdf'.")
+    # Save HTML content to a file
+    with open("cv.html", "w") as file:
+        file.write(html_content)
+
+    # Convert HTML to PDF
+    pdfkit.from_file("cv.html", "cv.pdf")
+
+    # Display success message and provide download link
+    st.success("CV generated successfully!")
+    st.download_button("Download CV", data=open("cv.pdf", "rb"), file_name="cv.pdf")
 
 if __name__ == "__main__":
     main()
