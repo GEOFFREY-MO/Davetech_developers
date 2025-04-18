@@ -51,7 +51,7 @@ def preprocess_text(text, max_length=128):
     return ' '.join(text.split()[:max_length])  # Truncate text to max_length words
 
 # Function to load sentiment analysis pipeline
-st.cache_data(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True)
 def load_sentiment_pipeline():
     return pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 
